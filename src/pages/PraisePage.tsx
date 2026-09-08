@@ -10,7 +10,7 @@ export function PraisePage() {
         { key: 'title', label: '제목', type: 'text', required: true },
         { key: 'title_en', label: '제목(영문)', type: 'text' },
         { key: 'video_url', label: '영상 URL', type: 'text', required: true },
-        { key: 'thumbnail_url', label: '썸네일 URL', type: 'text' },
+        { key: 'thumbnail_url', label: '썸네일', type: 'file', bucket: 'public-assets' },
         { key: 'is_active', label: '게시 여부', type: 'boolean' },
       ]}
     />

@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from 'react'
 import { useCrud } from '../hooks/useCrud'
+import { uploadFile } from '../lib/storage'
 
-type FieldType = 'text' | 'textarea' | 'number' | 'boolean' | 'select'
+type FieldType = 'text' | 'textarea' | 'number' | 'boolean' | 'select' | 'file'
 
 export type FieldConfig = {
   key: string
@@ -9,6 +10,8 @@ export type FieldConfig = {
   type: FieldType
   options?: { value: string; label: string }[]
   required?: boolean
+  /** required when type === 'file': which storage bucket to upload into */
+  bucket?: string
 }
 
 type Row = { id: string; [key: string]: unknown }
@@ -27,6 +30,20 @@ export function CrudPage({
   const { list, create, update, remove } = useCrud<Row>(table, orderBy)
   const [editing, setEditing] = useState<Row | 'new' | null>(null)
   const [values, setValues] = useState<Record<string, unknown>>({})
+  const [uploading, setUploading] = useState<string | null>(null)
+
+  async function handleFileChange(key: string, bucket: string, file: File | undefined) {
+    if (!file) return
+    setUploading(key)
+    try {
+      const url = await uploadFile(bucket, file, table)
+      setValues((v) => ({ ...v, [key]: url }))
+    } catch (err) {
+      alert(err instanceof Error ? err.message : '업로드 실패')
+    } finally {
+      setUploading(null)
+    }
+  }
 
   function startCreate() {
     setEditing('new')
@@ -92,6 +109,25 @@ export function CrudPage({
                   onChange={(e) => setValues((v) => ({ ...v, [f.key]: e.target.checked }))}
                   className="h-4 w-4"
                 />
+              ) : f.type === 'file' ? (
+                <div className="flex flex-col gap-1">
+                  <input
+                    type="file"
+                    onChange={(e) => handleFileChange(f.key, f.bucket!, e.target.files?.[0])}
+                    className="text-sm"
+                  />
+                  {uploading === f.key && <span className="text-xs text-gray-400">업로드 중...</span>}
+                  {typeof values[f.key] === 'string' && values[f.key] !== '' && (
+                    <a
+                      href={values[f.key] as string}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="truncate text-xs text-blue-600 hover:underline"
+                    >
+                      {values[f.key] as string}
+                    </a>
+                  )}
+                </div>
               ) : f.type === 'select' ? (
                 <select
                   value={(values[f.key] as string) ?? ''}

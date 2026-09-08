@@ -23,7 +23,7 @@ export function SermonsPage() {
         { key: 'scripture', label: '본문', type: 'text' },
         { key: 'summary', label: '요약', type: 'textarea' },
         { key: 'video_url', label: '영상 URL', type: 'text' },
-        { key: 'file_url', label: '주보/첨부파일 URL', type: 'text' },
+        { key: 'file_url', label: '주보/첨부파일', type: 'file', bucket: 'public-assets' },
         { key: 'is_active', label: '게시 여부', type: 'boolean' },
       ]}
     />
