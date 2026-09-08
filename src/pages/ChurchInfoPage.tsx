@@ -12,6 +12,9 @@ type ChurchInfo = {
   longitude: number | null
   phone: string | null
   email: string | null
+  bank_name: string | null
+  bank_account_number: string | null
+  bank_account_holder: string | null
 }
 
 export function ChurchInfoPage() {
@@ -69,6 +72,9 @@ export function ChurchInfoPage() {
         {field('longitude', '경도')}
         {field('phone', '전화번호')}
         {field('email', '이메일')}
+        {field('bank_name', '은행명 (온라인 헌금 안내용)')}
+        {field('bank_account_number', '계좌번호')}
+        {field('bank_account_holder', '예금주')}
         <button
           type="submit"
           disabled={save.isPending}
