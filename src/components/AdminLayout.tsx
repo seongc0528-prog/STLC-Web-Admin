@@ -3,14 +3,15 @@ import { supabase } from '../lib/supabase'
 
 const navItems = [
   { to: '/', label: '대시보드' },
-  { to: '/church-info', label: '교회 소개 관리' },
-  { to: '/sermons', label: '주일설교 · 수요예배' },
+  { to: '/church-info', label: '예배 안내 · 오시는 길' },
+  { to: '/staff', label: '섬기는 사람들' },
+  { to: '/history', label: '교회 연혁' },
+  { to: '/sermons', label: '주일설교 · 수요예배 · 주보' },
   { to: '/praise', label: '찬양 영상' },
   { to: '/photos', label: '행사 사진' },
   { to: '/testimonies', label: '은혜 간증' },
   { to: '/mission-news', label: '선교 소식' },
   { to: '/notices', label: '교회 소식' },
-  { to: '/bulletins', label: '주보' },
   { to: '/resources', label: '자료실' },
   { to: '/donations', label: '헌금 내역' },
   { to: '/education', label: '교육 신청 관리' },

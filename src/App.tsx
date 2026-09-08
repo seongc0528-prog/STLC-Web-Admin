@@ -1,9 +1,22 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { AdminLayout } from './components/AdminLayout'
 import { ProtectedRoute } from './components/ProtectedRoute'
-import { PagePlaceholder } from './components/PagePlaceholder'
 import { Login } from './pages/Login'
 import { Dashboard } from './pages/Dashboard'
+import { ChurchInfoPage } from './pages/ChurchInfoPage'
+import { StaffPage } from './pages/StaffPage'
+import { HistoryPage } from './pages/HistoryPage'
+import { SermonsPage } from './pages/SermonsPage'
+import { PraisePage } from './pages/PraisePage'
+import { PhotosPage } from './pages/PhotosPage'
+import { TestimoniesPage } from './pages/TestimoniesPage'
+import { MissionNewsPage } from './pages/MissionNewsPage'
+import { NoticesPage } from './pages/NoticesPage'
+import { ResourcesPage } from './pages/ResourcesPage'
+import { DonationsPage } from './pages/DonationsPage'
+import { EducationPage } from './pages/EducationPage'
+import { MembersPage } from './pages/MembersPage'
+import { PushPage } from './pages/PushPage'
 
 function App() {
   return (
@@ -17,19 +30,20 @@ function App() {
         }
       >
         <Route index element={<Dashboard />} />
-        <Route path="church-info" element={<PagePlaceholder title="교회 소개 관리" description="위임목사·섬기는사람들·예배안내·연혁·오시는길" />} />
-        <Route path="sermons" element={<PagePlaceholder title="주일설교 · 수요예배 관리" />} />
-        <Route path="praise" element={<PagePlaceholder title="찬양 영상 관리" />} />
-        <Route path="photos" element={<PagePlaceholder title="행사 사진 관리" />} />
-        <Route path="testimonies" element={<PagePlaceholder title="은혜 간증 모더레이션" />} />
-        <Route path="mission-news" element={<PagePlaceholder title="선교 소식 관리" />} />
-        <Route path="notices" element={<PagePlaceholder title="교회 소식 관리" />} />
-        <Route path="bulletins" element={<PagePlaceholder title="주보 관리" />} />
-        <Route path="resources" element={<PagePlaceholder title="자료실 관리" />} />
-        <Route path="donations" element={<PagePlaceholder title="헌금 내역 조회" />} />
-        <Route path="education" element={<PagePlaceholder title="교육 신청 관리" description="직분자 제자훈련 · 대학청년 · 주일학교" />} />
-        <Route path="members" element={<PagePlaceholder title="회원 관리" description="가입 승인 · 역할 변경" />} />
-        <Route path="push" element={<PagePlaceholder title="푸시 발송" />} />
+        <Route path="church-info" element={<ChurchInfoPage />} />
+        <Route path="staff" element={<StaffPage />} />
+        <Route path="history" element={<HistoryPage />} />
+        <Route path="sermons" element={<SermonsPage />} />
+        <Route path="praise" element={<PraisePage />} />
+        <Route path="photos" element={<PhotosPage />} />
+        <Route path="testimonies" element={<TestimoniesPage />} />
+        <Route path="mission-news" element={<MissionNewsPage />} />
+        <Route path="notices" element={<NoticesPage />} />
+        <Route path="resources" element={<ResourcesPage />} />
+        <Route path="donations" element={<DonationsPage />} />
+        <Route path="education" element={<EducationPage />} />
+        <Route path="members" element={<MembersPage />} />
+        <Route path="push" element={<PushPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>
