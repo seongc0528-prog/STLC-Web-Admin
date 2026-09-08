@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { useCrud } from '../hooks/useCrud'
 
@@ -11,25 +12,36 @@ type PushLog = {
 }
 
 export function PushPage() {
-  const { list, create } = useCrud<PushLog>('push_logs', 'sent_at')
+  const { list } = useCrud<PushLog>('push_logs', 'sent_at')
+  const queryClient = useQueryClient()
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
+  const [sending, setSending] = useState(false)
+  const [result, setResult] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
-    const { data: userData } = await supabase.auth.getUser()
-    await create.mutateAsync({ title, body, target: 'all', sent_by: userData.user?.id } as Partial<PushLog>)
+    setSending(true)
+    setError(null)
+    setResult(null)
+
+    const { data, error } = await supabase.functions.invoke('send-push', { body: { title, body: body } })
+
+    setSending(false)
+    if (error) {
+      setError(error.message)
+      return
+    }
+    setResult(`발송 완료: 성공 ${data.successCount} / 실패 ${data.failureCount} (전체 ${data.total}건)`)
     setTitle('')
     setBody('')
+    queryClient.invalidateQueries({ queryKey: ['push_logs'] })
   }
 
   return (
     <div>
-      <h2 className="mb-2 text-xl font-semibold text-gray-900">푸시 발송</h2>
-      <p className="mb-4 rounded border border-amber-300 bg-amber-50 p-3 text-sm text-amber-700">
-        ⚠️ 아직 실제 FCM 발송 기능(Cloud Function)이 연결되지 않았습니다. 지금은 발송 기록만 저장됩니다 — FCM
-        연동 완료 후 이 화면에서 실제 발송까지 동작하도록 이어서 개발할 예정입니다.
-      </p>
+      <h2 className="mb-4 text-xl font-semibold text-gray-900">푸시 발송</h2>
 
       <form onSubmit={handleSubmit} className="mb-6 flex max-w-lg flex-col gap-3 rounded border border-gray-200 p-4">
         <label className="flex flex-col gap-1 text-sm">
@@ -51,8 +63,14 @@ export function PushPage() {
             className="rounded border border-gray-300 px-2 py-1"
           />
         </label>
-        <button type="submit" className="w-fit rounded bg-gray-900 px-4 py-2 text-sm font-medium text-white">
-          발송 기록 저장
+        {error && <p className="text-sm text-red-600">{error}</p>}
+        {result && <p className="text-sm text-green-600">{result}</p>}
+        <button
+          type="submit"
+          disabled={sending}
+          className="w-fit rounded bg-gray-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+        >
+          {sending ? '발송 중...' : '전체 발송'}
         </button>
       </form>
 
