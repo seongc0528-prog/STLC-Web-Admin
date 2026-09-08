@@ -1,72 +1,29 @@
 // Supabase Edge Function: send-push
 //
 // Called by STLC_Admin's push page. Verifies the caller is an admin, then
-// sends an FCM notification to every row in push_subscriptions using the
-// FCM HTTP v1 API, authenticated via a Google service account (RS256 JWT
-// exchanged for an OAuth2 access token — no external library needed, just
-// Web Crypto, which Deno's edge runtime supports natively).
+// sends a standard Web Push notification (no Firebase/FCM involved) to
+// every row in push_subscriptions via the `web-push` npm package.
 //
-// Required secret (set with `supabase secrets set`):
-//   FIREBASE_SERVICE_ACCOUNT = <the full service account JSON, as one line>
+// Required secrets (set with `supabase secrets set`):
+//   VAPID_PUBLIC_KEY  — same value as STLC_Web's NEXT_PUBLIC_VAPID_PUBLIC_KEY
+//   VAPID_PRIVATE_KEY — the matching private key (keep this one secret)
 //
 // SUPABASE_URL / SUPABASE_ANON_KEY / SUPABASE_SERVICE_ROLE_KEY are injected
 // automatically by the Supabase platform — no need to set them manually.
 
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import webpush from "npm:web-push@3.6.7";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-function base64url(input: ArrayBuffer | string): string {
-  const bytes = typeof input === "string" ? new TextEncoder().encode(input) : new Uint8Array(input);
-  let str = btoa(String.fromCharCode(...bytes));
-  return str.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-}
-
-function pemToArrayBuffer(pem: string): ArrayBuffer {
-  const b64 = pem.replace(/-----BEGIN PRIVATE KEY-----/, "").replace(/-----END PRIVATE KEY-----/, "").replace(/\s/g, "");
-  const binary = atob(b64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-  return bytes.buffer;
-}
-
-async function getAccessToken(serviceAccount: { client_email: string; private_key: string }) {
-  const now = Math.floor(Date.now() / 1000);
-  const header = { alg: "RS256", typ: "JWT" };
-  const claims = {
-    iss: serviceAccount.client_email,
-    scope: "https://www.googleapis.com/auth/firebase.messaging",
-    aud: "https://oauth2.googleapis.com/token",
-    iat: now,
-    exp: now + 3600,
-  };
-  const unsigned = `${base64url(JSON.stringify(header))}.${base64url(JSON.stringify(claims))}`;
-
-  const key = await crypto.subtle.importKey(
-    "pkcs8",
-    pemToArrayBuffer(serviceAccount.private_key),
-    { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
-    false,
-    ["sign"],
-  );
-  const signature = await crypto.subtle.sign("RSASSA-PKCS1-v1_5", key, new TextEncoder().encode(unsigned));
-  const jwt = `${unsigned}.${base64url(signature)}`;
-
-  const res = await fetch("https://oauth2.googleapis.com/token", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
-      grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
-      assertion: jwt,
-    }),
-  });
-  if (!res.ok) throw new Error(`token exchange failed: ${await res.text()}`);
-  const data = await res.json();
-  return data.access_token as string;
-}
+webpush.setVapidDetails(
+  "mailto:admin@sydneythelordchurch.org",
+  Deno.env.get("VAPID_PUBLIC_KEY")!,
+  Deno.env.get("VAPID_PRIVATE_KEY")!,
+);
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -99,37 +56,28 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "title/body required" }), { status: 400, headers: corsHeaders });
     }
 
-    const serviceAccount = JSON.parse(Deno.env.get("FIREBASE_SERVICE_ACCOUNT")!);
-    const accessToken = await getAccessToken(serviceAccount);
-
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
     const { data: subscriptions, error: subsError } = await adminClient
       .from("push_subscriptions")
-      .select("id, fcm_token");
+      .select("id, endpoint, p256dh, auth_key");
     if (subsError) throw subsError;
 
     let successCount = 0;
     let failureCount = 0;
     const invalidIds: string[] = [];
+    const payload = JSON.stringify({ title, body });
 
     for (const sub of subscriptions ?? []) {
-      const res = await fetch(
-        `https://fcm.googleapis.com/v1/projects/${serviceAccount.project_id}/messages:send`,
-        {
-          method: "POST",
-          headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
-          body: JSON.stringify({ message: { token: sub.fcm_token, notification: { title, body } } }),
-        },
-      );
-      if (res.ok) {
+      try {
+        await webpush.sendNotification(
+          { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth_key } },
+          payload,
+        );
         successCount++;
-      } else {
+      } catch (err) {
         failureCount++;
-        const errBody = await res.json().catch(() => null);
-        const status = errBody?.error?.status;
-        if (status === "UNREGISTERED" || status === "NOT_FOUND" || status === "INVALID_ARGUMENT") {
-          invalidIds.push(sub.id);
-        }
+        const statusCode = (err as { statusCode?: number }).statusCode;
+        if (statusCode === 404 || statusCode === 410) invalidIds.push(sub.id);
       }
     }
 
