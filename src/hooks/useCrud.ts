@@ -1,9 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 
-export function useCrud<T extends { id: string }>(table: string, orderBy = 'created_at') {
+export function useCrud<T extends { id: string }>(
+  table: string,
+  orderBy = 'created_at',
+  ascending = false,
+) {
   const queryClient = useQueryClient()
-  const queryKey = [table]
+  const queryKey = [table, orderBy, ascending]
 
   const list = useQuery({
     queryKey,
@@ -11,7 +15,7 @@ export function useCrud<T extends { id: string }>(table: string, orderBy = 'crea
       const { data, error } = await supabase
         .from(table)
         .select('*')
-        .order(orderBy, { ascending: false })
+        .order(orderBy, { ascending })
       if (error) throw error
       return data as T[]
     },

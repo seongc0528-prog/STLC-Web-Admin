@@ -17,6 +17,8 @@ const navItems = [
   { to: '/education', label: '교육 신청 관리' },
   { to: '/members', label: '회원 관리' },
   { to: '/push', label: '푸시 발송' },
+  { to: '/scheduled-push', label: '예약 푸시 발송' },
+  { to: '/daily-verses', label: '데일리 말씀' },
 ]
 
 export function AdminLayout() {

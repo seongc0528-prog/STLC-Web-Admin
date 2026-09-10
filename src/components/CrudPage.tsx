@@ -21,13 +21,15 @@ export function CrudPage({
   title,
   fields,
   orderBy = 'created_at',
+  ascending = false,
 }: {
   table: string
   title: string
   fields: FieldConfig[]
   orderBy?: string
+  ascending?: boolean
 }) {
-  const { list, create, update, remove } = useCrud<Row>(table, orderBy)
+  const { list, create, update, remove } = useCrud<Row>(table, orderBy, ascending)
   const [editing, setEditing] = useState<Row | 'new' | null>(null)
   const [values, setValues] = useState<Record<string, unknown>>({})
   const [uploading, setUploading] = useState<string | null>(null)
