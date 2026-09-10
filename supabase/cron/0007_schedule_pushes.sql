@@ -3,8 +3,11 @@
 --
 -- 마이그레이션 0007 을 먼저 적용하고, Edge Function 배포 + 시크릿 설정을
 -- 끝낸 뒤에 실행한다:
---   supabase functions deploy run-scheduled-push
+--   supabase functions deploy run-scheduled-push --no-verify-jwt --use-api
 --   supabase secrets set CRON_SECRET=<임의의 긴 문자열>
+--
+-- 배포 시 --no-verify-jwt 가 빠지면 아래 호출이 전부 401로 막힌다. 크론은 JWT 없이
+-- x-cron-secret 헤더만 보내기 때문. (인증은 함수 코드가 직접 한다)
 --
 -- 아래 __CRON_SECRET__ 자리에 위에서 정한 값과 **같은 문자열**을 넣을 것.
 -- 프로젝트 ref 는 cqzbkravqkenpytjyajy (다른 프로젝트면 바꿀 것).

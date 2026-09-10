@@ -26,11 +26,19 @@ Supabase DB로 옮기고, 예약된 시각에 Edge Function 이 **말씀 본문�
    `migrations/0007_daily_verses_scheduled_push.sql` 전체 실행.
    (`시드니 시간 매일 07:00 데일리 말씀` 예약 1건이 자동으로 만들어진다.)
 
-2. **Edge Function 배포**
+2. **Edge Function 배포** — `--no-verify-jwt` 가 **반드시** 필요하다.
 
    ```bash
-   supabase functions deploy run-scheduled-push
+   supabase functions deploy run-scheduled-push --no-verify-jwt --use-api
    ```
+
+   `verify_jwt`(기본값 true)를 켜 두면 Supabase 게이트웨이가 **유효한 JWT 없는 요청을
+   함수 코드에 닿기 전에 401로 막는다.** 크론은 JWT 없이 `x-cron-secret` 헤더만 보내므로
+   정시 발송이 전부 401로 실패한다. 대신 함수가 직접 호출자를 검증한다 —
+   크론은 `CRON_SECRET` 일치, 관리자 즉시발송은 JWT + `profiles.role = 'admin'` 확인.
+   따라서 게이트웨이 검증을 꺼도 인증 없이 발송할 수는 없다.
+
+   `--use-api` 는 Docker 없이 서버에서 번들링하라는 뜻이다(로컬에 Docker가 없을 때 필요).
 
 3. **시크릿 설정** — `CRON_SECRET` 은 아무 긴 랜덤 문자열이면 된다.
 
