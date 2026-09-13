@@ -7,6 +7,7 @@ export function BulletinsPage() {
       table="bulletins"
       title="주보"
       orderBy="sunday_date"
+      createLabel="+ 새 주보 올리기"
       fields={[
         { key: 'sunday_date', label: '주일 날짜', type: 'date', required: true, defaultValue: nearestSunday },
         {
