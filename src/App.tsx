@@ -7,6 +7,7 @@ import { ChurchInfoPage } from './pages/ChurchInfoPage'
 import { StaffPage } from './pages/StaffPage'
 import { HistoryPage } from './pages/HistoryPage'
 import { SermonsPage } from './pages/SermonsPage'
+import { BulletinsPage } from './pages/BulletinsPage'
 import { PraisePage } from './pages/PraisePage'
 import { PhotosPage } from './pages/PhotosPage'
 import { TestimoniesPage } from './pages/TestimoniesPage'
@@ -36,6 +37,7 @@ function App() {
         <Route path="staff" element={<StaffPage />} />
         <Route path="history" element={<HistoryPage />} />
         <Route path="sermons" element={<SermonsPage />} />
+        <Route path="bulletins" element={<BulletinsPage />} />
         <Route path="praise" element={<PraisePage />} />
         <Route path="photos" element={<PhotosPage />} />
         <Route path="testimonies" element={<TestimoniesPage />} />
