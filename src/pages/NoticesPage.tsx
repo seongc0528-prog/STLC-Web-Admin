@@ -4,7 +4,7 @@ export function NoticesPage() {
   return (
     <CrudPage
       table="notices"
-      title="교회 소식"
+      title="공지사항"
       fields={[
         { key: 'title', label: '제목', type: 'text', required: true },
         { key: 'content', label: '내용', type: 'textarea', required: true },

@@ -23,6 +23,8 @@ export type FieldConfig = {
   defaultValue?: () => unknown
   /** keep the field in the form but not as a column in the list */
   hideInList?: boolean
+  /** guidance shown under the input */
+  help?: string
 }
 
 type Row = { id: string; [key: string]: unknown }
@@ -229,6 +231,7 @@ export function CrudPage({
                   className="rounded border border-gray-300 px-2 py-1"
                 />
               )}
+              {f.help && <span className="text-xs text-gray-500">{f.help}</span>}
             </label>
           ))}
           <div className="flex gap-2">

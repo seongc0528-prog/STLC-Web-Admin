@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 
 const navItems = [
   { to: '/', label: '대시보드' },
+  { to: '/popups', label: '홈 팝업' },
   { to: '/church-info', label: '예배 안내 · 오시는 길' },
   { to: '/staff', label: '섬기는 사람들' },
   { to: '/history', label: '교회 연혁' },
@@ -12,7 +13,7 @@ const navItems = [
   { to: '/photos', label: '행사 사진' },
   { to: '/testimonies', label: '은혜 간증' },
   { to: '/mission-news', label: '선교 소식' },
-  { to: '/notices', label: '교회 소식' },
+  { to: '/notices', label: '공지사항' },
   { to: '/resources', label: '자료실' },
   { to: '/donations', label: '헌금 내역' },
   { to: '/education', label: '교육 신청 관리' },

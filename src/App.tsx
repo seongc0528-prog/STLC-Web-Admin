@@ -20,6 +20,7 @@ import { MembersPage } from './pages/MembersPage'
 import { PushPage } from './pages/PushPage'
 import { ScheduledPushPage } from './pages/ScheduledPushPage'
 import { DailyVersesPage } from './pages/DailyVersesPage'
+import { PopupsPage } from './pages/PopupsPage'
 
 function App() {
   return (
@@ -50,6 +51,7 @@ function App() {
         <Route path="push" element={<PushPage />} />
         <Route path="scheduled-push" element={<ScheduledPushPage />} />
         <Route path="daily-verses" element={<DailyVersesPage />} />
+        <Route path="popups" element={<PopupsPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>
